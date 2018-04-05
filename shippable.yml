@@ -15,7 +15,14 @@ resources:
       region: "us-west1-a"
 
 # GKE cluster info
-  - name: gke_cluster
+  - name: dev_cluster
+    type: cluster
+    integration: "dr_avi"
+    pointer:
+      sourceName: "cluster"
+      region: "us-west1-a"
+
+  - name: prod_cluster
     type: cluster
     integration: "dr_avi"
     pointer:
@@ -23,51 +30,39 @@ resources:
       region: "us-west1-a"
 
 jobs:
-  - name: deploy_app_kctl_gke
-    type: runSh
-    steps:
-      - IN: node_app_img_dh # defined here https://github.com/devops-recipes/node_app/blob/master/shippable.yml
-      - IN: gcp_cli
-        switch: off
-      - IN: gke_cluster
-        switch: off
-      - IN: config_repo
-        switch: off
-      - TASK:
-          name: deploy_app
-          runtime:
-            options:
-              env:
-                - APP_LABEL: "kctl-app"
-          script:
-            - pushd $(shipctl get_resource_state "config_repo")
-            - cd specs
-            - export APP_IMG=$(shipctl get_resource_version_key node_app_img_dh sourceName)
-            - export APP_TAG=$(shipctl get_resource_version_key node_app_img_dh versionName)
-            - shipctl replace appDeploy.yml appSvc.yml
-            - export CLUST=$(shipctl get_resource_version_key gke_cluster sourceName)
-            - export CLUST_REG=$(shipctl get_resource_version_key gke_cluster region)
-            - gcloud container clusters get-credentials $CLUST --zone $CLUST_REG
-            - kubectl delete  -f ./appDeploy.yml 2>/dev/null || echo ""
-            - kubectl delete -f ./appSvc.yml  2>/dev/null || echo ""
-            - kubectl create -o json -f ./appDeploy.yml >> kube_output.json
-            - kubectl create -o json -f ./appSvc.yml >> kube_output.json
-            - cat kube_output.json
-            - popd
-
-  - name: test
+  - name: test_kctl
     type: runSh
     steps:
       - IN: node_app_img_dh
       - IN: gcp_cli
+        switch: off
+      - IN: dev_cluster
+        switch: off
+      - IN: prod_cluster
+        switch: off
+      - IN: config_repo
         switch: off
       - TASK:
           name: test
           runtime:
             options:
               env:
-                - APP_LABEL: "kctl-app"
+                - APP_LABEL: "test-app"
           script:
             - gcloud projects list
             - export APP_IMG=$(shipctl get_resource_version_key node_app_img_dh sourceName)
             - export APP_TAG=$(shipctl get_resource_version_key node_app_img_dh versionName)
+            - export PROJECT="shipbeta"
+            - export CLUSTER_RES="dev_cluster"
+            - if [[ $APP_TAG = *"master"* ]]; then export PROJECT="devops-recipes"; export CLUSTER_RES="prod_cluster" fi
+            - gcloud config set project $PROJECT
+            #- export CLUST=$(shipctl get_resource_version_key $CLUSTER_RES sourceName)
+            #- export CLUST_REG=$(shipctl get_resource_version_key $CLUSTER_RES region)
+            - echo $CLUSTER_RES
+#            - gcloud container clusters get-credentials $CLUST --zone $CLUST_REG
+#            - kubectl delete  -f ./appDeploy.yml 2>/dev/null || echo ""
+#            - kubectl delete -f ./appSvc.yml  2>/dev/null || echo ""
+#            - kubectl create -o json -f ./appDeploy.yml >> kube_output.json
+#            - kubectl create -o json -f ./appSvc.yml >> kube_output.json
+#            - cat kube_output.json
+            - popd
