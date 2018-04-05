@@ -49,13 +49,13 @@ jobs:
               env:
                 - APP_LABEL: "test-app"
           script:
-            - gcloud projects list
+            - pushd $(shipctl get_resource_state "config_repo")/specs
             - export APP_IMG=$(shipctl get_resource_version_key node_app_img_dh sourceName)
             - export APP_TAG=$(shipctl get_resource_version_key node_app_img_dh versionName)
             - export PROJECT="shipbeta"
             - export CLUSTER_RES="dev_cluster"
-            - if [[ $APP_TAG = *"master"* ]]; then export PROJECT="devops-recipes"; fi
-            - if [[ $APP_TAG = *"master"* ]]; then export CLUSTER_RES="prod_cluster"; fi
+            - if [[ $APP_TAG = *"master"* ]]; then export PROJECT="devops-recipes"; export CLUSTER_RES="prod_cluster"; fi
+            #- if [[ $APP_TAG = *"master"* ]]; then  fi
             #- export CLUST=$(shipctl get_resource_version_key $CLUSTER_RES sourceName)
             #- export CLUST_REG=$(shipctl get_resource_version_key $CLUSTER_RES region)
             - echo $CLUSTER_RES
