@@ -55,15 +55,13 @@ jobs:
             - export PROJECT="shipbeta"
             - export CLUSTER_RES="dev_cluster"
             - if [[ $APP_TAG = *"master"* ]]; then export PROJECT="devops-recipes"; export CLUSTER_RES="prod_cluster"; fi
-            #- if [[ $APP_TAG = *"master"* ]]; then  fi
-            #- export CLUST=$(shipctl get_resource_version_key $CLUSTER_RES sourceName)
-            #- export CLUST_REG=$(shipctl get_resource_version_key $CLUSTER_RES region)
-            - echo $CLUSTER_RES
-            # - gcloud config set project $PROJECT
-#            - gcloud container clusters get-credentials $CLUST --zone $CLUST_REG
-#            - kubectl delete  -f ./appDeploy.yml 2>/dev/null || echo ""
-#            - kubectl delete -f ./appSvc.yml  2>/dev/null || echo ""
-#            - kubectl create -o json -f ./appDeploy.yml >> kube_output.json
-#            - kubectl create -o json -f ./appSvc.yml >> kube_output.json
-#            - cat kube_output.json
+            - export CLUST=$(shipctl get_resource_version_key $CLUSTER_RES sourceName)
+            - export CLUST_REG=$(shipctl get_resource_version_key $CLUSTER_RES region)
+            - gcloud config set project $PROJECT
+            - gcloud container clusters get-credentials $CLUST --zone $CLUST_REG
+            - kubectl delete  -f ./appDeploy.yml 2>/dev/null || echo ""
+            - kubectl delete -f ./appSvc.yml  2>/dev/null || echo ""
+            - kubectl create -o json -f ./appDeploy.yml >> kube_output.json
+            - kubectl create -o json -f ./appSvc.yml >> kube_output.json
+            - cat kube_output.json
             - popd
