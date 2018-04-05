@@ -2,22 +2,22 @@ resources:
 # REPO of kube configs
   - name: config_repo
     type: gitRepo
-    integration: "drship_github"
+    integration: "demo_gh"
     versionTemplate:
-      sourceName: "devops-recipes/cd_gke_kubectl"
+      sourceName: "avinci/cd_gke_kubectl"
       branch: master
 
 # gcloud CLI Config
   - name: gcp_cli
     type: cliConfig
-    integration: "drship_gcp"
+    integration: "demo_gke"
     versionTemplate:
       region: "us-west1-a"
 
 # GKE cluster info
   - name: gke_cluster
     type: cluster
-    integration: "drship_gcp"
+    integration: "demo_gke"
     pointer:
       sourceName: "cluster"
       region: "us-west1-a"
@@ -25,7 +25,6 @@ resources:
 jobs:
   - name: deploy_app_kctl_gke
     type: runSh
-    dependencyMode: strict
     steps:
       - IN: node_app_img_dh # defined here https://github.com/devops-recipes/node_app/blob/master/shippable.yml
       - IN: gcp_cli
@@ -55,7 +54,18 @@ jobs:
             - kubectl create -o json -f ./appSvc.yml >> kube_output.json
             - cat kube_output.json
             - popd
-    flags:
-      - gke
-      - cd
-      - kctl
+
+  - name: deploy_app_kctl_gke
+    type: runSh
+    steps:
+      - IN: node_app_img_dh
+      - IN: gcp_cli
+        switch: off
+      - TASK:
+          name: deploy_app
+          runtime:
+            options:
+              env:
+                - APP_LABEL: "kctl-app"
+          script:
+            - gcloud projects list
