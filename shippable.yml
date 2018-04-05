@@ -10,14 +10,14 @@ resources:
 # gcloud CLI Config
   - name: gcp_cli
     type: cliConfig
-    integration: "demo_gke"
+    integration: "dr_avi"
     versionTemplate:
       region: "us-west1-a"
 
 # GKE cluster info
   - name: gke_cluster
     type: cluster
-    integration: "demo_gke"
+    integration: "dr_avi"
     pointer:
       sourceName: "cluster"
       region: "us-west1-a"
