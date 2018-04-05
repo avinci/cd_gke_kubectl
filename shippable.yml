@@ -55,14 +55,14 @@ jobs:
             - cat kube_output.json
             - popd
 
-  - name: deploy_app_kctl_gke
+  - name: test
     type: runSh
     steps:
       - IN: node_app_img_dh
       - IN: gcp_cli
         switch: off
       - TASK:
-          name: deploy_app
+          name: test
           runtime:
             options:
               env:
