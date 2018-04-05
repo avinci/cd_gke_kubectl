@@ -43,7 +43,7 @@ jobs:
             - pushd $(shipctl get_resource_state "config_repo")
             - cd specs
             - export APP_IMG=$(shipctl get_resource_version_key node_app_img_dh sourceName)
-            - export APP_TAG=$(shipctl get_resource_version_name node_app_img_dh)
+            - export APP_TAG=$(shipctl get_resource_version_key node_app_img_dh versionName)
             - shipctl replace appDeploy.yml appSvc.yml
             - export CLUST=$(shipctl get_resource_version_key gke_cluster sourceName)
             - export CLUST_REG=$(shipctl get_resource_version_key gke_cluster region)
@@ -69,3 +69,5 @@ jobs:
                 - APP_LABEL: "kctl-app"
           script:
             - gcloud projects list
+            - export APP_IMG=$(shipctl get_resource_version_key node_app_img_dh sourceName)
+            - export APP_TAG=$(shipctl get_resource_version_key node_app_img_dh versionName)
