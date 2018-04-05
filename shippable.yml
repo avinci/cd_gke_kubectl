@@ -54,7 +54,7 @@ jobs:
             - export APP_TAG=$(shipctl get_resource_version_key node_app_img_dh versionName)
             - export PROJECT="shipbeta"
             - export CLUSTER_RES="dev_cluster"
-            - if [[ $APP_TAG = *"master"* ]]; then export PROJECT="devops-recipes" CLUSTER_RES="prod_cluster" fi
+            - if [[ $APP_TAG = *"master"* ]]; then PROJECT="devops-recipes" CLUSTER_RES="prod_cluster" fi
             - gcloud config set project $PROJECT
             #- export CLUST=$(shipctl get_resource_version_key $CLUSTER_RES sourceName)
             #- export CLUST_REG=$(shipctl get_resource_version_key $CLUSTER_RES region)
