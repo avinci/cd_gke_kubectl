@@ -48,17 +48,21 @@ jobs:
             options:
               env:
                 - APP_LABEL: "test-app"
+                - PROJECT: "shipbeta" #setting default to dev
+                - CLUSTER_RES: "dev_cluster" #setting default to dev
           script:
             - pushd $(shipctl get_resource_state "config_repo")/specs
+            # get the tag
             - export APP_IMG=$(shipctl get_resource_version_key node_app_img_dh sourceName)
             - export APP_TAG=$(shipctl get_resource_version_key node_app_img_dh versionName)
-            - export PROJECT="shipbeta"
-            - export CLUSTER_RES="dev_cluster"
+            - shipctl replace appDeploy.yml appSvc.yml
+            # change the target depending on the version of the image tag
             - if [[ $APP_TAG = *"master"* ]]; then export PROJECT="devops-recipes"; export CLUSTER_RES="prod_cluster"; fi
             - export CLUST=$(shipctl get_resource_version_key $CLUSTER_RES sourceName)
             - export CLUST_REG=$(shipctl get_resource_version_key $CLUSTER_RES region)
             - gcloud config set project $PROJECT
             - gcloud container clusters get-credentials $CLUST --zone $CLUST_REG
+            # deploy the app
             - kubectl delete  -f ./appDeploy.yml 2>/dev/null || echo ""
             - kubectl delete -f ./appSvc.yml  2>/dev/null || echo ""
             - kubectl create -o json -f ./appDeploy.yml >> kube_output.json
